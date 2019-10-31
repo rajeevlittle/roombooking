@@ -45,6 +45,7 @@ public class RoomController {
         @Valid @RequestBody RoomModel roomDetails) throws ResourceNotFoundException {
     	RoomModel room = roomRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + userId));
+    	
 
         room.setRoomName(roomDetails.getRoomName());
         room.setDescription(roomDetails.getDescription());
@@ -57,7 +58,7 @@ public class RoomController {
     public Map < String, Boolean > deleteUser(@PathVariable(value = "id") Long roomId)
     throws ResourceNotFoundException {
         RoomModel room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found for this id :: " + roomId));
+            .orElseThrow(() -> new ResourceNotFoundException("Room not found for this id :: " + roomId));
 
         roomRepository.delete(room);
         Map < String, Boolean > response = new HashMap < > ();
