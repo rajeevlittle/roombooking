@@ -217,7 +217,7 @@ public class BookingController {
 	}
 	
 	@RequestMapping("/bookings/user/{name}")
-    public List<BookingList> getBookingListByRoomName(@PathVariable(value = "name") String user_name, @Valid @RequestBody AllBookingList booking_request) {
+    public List<BookingList> getBookingListByUserName(@PathVariable(value = "name") String user_name, @Valid @RequestBody AllBookingList booking_request) {
 		
 		List<BookingList> list = new ArrayList<BookingList>();
 
@@ -295,4 +295,87 @@ public class BookingController {
 		
 		return list;
 	}
+	
+	
+	@RequestMapping("/bookings/room/{name}")
+    public List<BookingList> getBookingListByRoomName(@PathVariable(value = "name") String room_name, @Valid @RequestBody AllBookingList booking_request) {
+		
+		List<BookingList> list = new ArrayList<BookingList>();
+
+		List<RoomModel> room;
+		room = roomRepository.findByRoomName(room_name);
+		if(room.size() == 0)
+		{
+			return list;
+		}
+		
+		Date startDate = null, endDate = null;
+		
+		if(booking_request.getDateFrom() == null) {
+			try {
+				startDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2000-01-01 00:00:00");
+			} catch (ParseException e) {
+				
+				e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				startDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(booking_request.getDateFrom());
+			} catch (ParseException e) {
+				return list;
+			}
+		}
+		
+		if(booking_request.getDateTo() == null) {
+			try {
+				endDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2100-12-31 00:00:00");
+			} catch (ParseException e) {
+				
+				e.printStackTrace();
+			}
+		}
+		else {
+			
+			try {
+				endDate=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(booking_request.getDateTo());
+			} catch (ParseException e) {
+				return list;
+			}
+		}
+			
+		List<BookingModel> booking_list;
+		booking_list = bookingRepository.findByUserId(room.get(0).getId());
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		String temp = dateFormat.format(startDate);
+		System.out.println(temp);
+		
+		for(int i = 0; i < booking_list.size(); i++)
+		{
+			BookingModel model = booking_list.get(i);
+			if(!model.getDateFrom().before(startDate) && !model.getDateTo().after(endDate))
+			{
+				Optional<UserModel> booking_user;		
+				booking_user = userRepository.findById(model.getUserId());
+				Optional<RoomModel> booking_room;		
+				booking_room = roomRepository.findById(model.getRoomId());
+				
+				if(booking_user.isPresent() && booking_room.isPresent())
+				{
+				
+					String strStartDate = dateFormat.format(model.getDateFrom());
+					String strEndDate = dateFormat.format(model.getDateTo());
+					list.add(new BookingList(booking_room.get().getRoomName(), booking_user.get().getName(), booking_user.get().getSurname(), strStartDate, strEndDate));
+				}
+				
+				
+			}
+			
+				
+		}
+		
+		return list;
+	}
+	
+	
 }
