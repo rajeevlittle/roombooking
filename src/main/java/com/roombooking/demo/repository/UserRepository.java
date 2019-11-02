@@ -9,6 +9,6 @@ import com.roombooking.demo.model.UserModel;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserModel, Long>{
-	List<UserModel> findByLoginAndPassword(String login, String password);
+	List<UserModel> findByLogin(String login);
 	List<UserModel> findByName(String name);
 }

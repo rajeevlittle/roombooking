@@ -31,8 +31,12 @@ public class UserController {
     private UserRepository userRepository;
 
     @RequestMapping("/users")
-    public UserModel createUser(@Valid @RequestBody UserModel user) {
-    	return userRepository.save(user);
+    public String createUser(@Valid @RequestBody UserModel user) {
+    	List<UserModel> existing = userRepository.findByLogin(user.getLogin());
+    	if(existing.size() > 0)
+    		return "login already exists";
+    	userRepository.save(user);
+    	return "success";
     }
     
     @GetMapping("/users")
